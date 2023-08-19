@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from easy_ast.einsum import Einsum
+from easy_ast.tensor_contract import TensorContract
 
 
 def test_einsum():
@@ -24,7 +24,7 @@ def test_einsum():
     c = np.array([1, 2])
     expect = -np.array([[1, 2], [2, 4]])
 
-    @Einsum().exec
+    @TensorContract().exec
     def x(i, j):
         d = 1
         assert d == 1
@@ -41,7 +41,7 @@ def test_einsum_2():
     assert e.shape == (2, 6)
     a = np.zeros([6, 2, 2])
 
-    @Einsum().exec
+    @TensorContract().exec
     def _(i, j, k, l, m):
         # i3, j6, k5, l4, m2
         a[j, m, 1] = b[i, 0, j, k] * c[i, l] * d[k, l, m] - e[m, j]

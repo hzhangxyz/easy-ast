@@ -46,7 +46,3 @@ def test_get_expression():
 
     x = 6
     assert Eval(tree) == 49
-
-
-test_get_statement()
-test_get_expression()
