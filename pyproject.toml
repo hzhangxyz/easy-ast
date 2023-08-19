@@ -1,4 +1,17 @@
 [project]
 name = "easy_ast"
-version = "0.0.1"
+version = "0.0.2"
+description = "This package `easy-ast` contains several utility about AST transformer."
+authors = [
+    {name = "Hao Zhang", email="hzhanxyz@outlook.com"},
+]
+license = {file = "LICENSE.rst"}
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["ast", "macro"]
 dependencies = []
+
+[project.urls]
+homepage = "https://github.com/hzhangxyz/easy-ast"
+documentation = "https://github.com/hzhangxyz/easy-ast"
+repository = "https://github.com/hzhangxyz/easy-ast"

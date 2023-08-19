@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2023 Hao Zhang<zh970205@mail.ustc.edu.cn>
+# Copyright (C) 2023 Hao Zhang<hzhangxyz@outlook.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,14 +17,11 @@
 #
 """Easy AST"""
 from __future__ import annotations
-
 import ast
 import textwrap
 import inspect
 import types
 import typing
-
-__version__: str = "0.0.1"
 
 
 def _get_default_context(globals: typing.Optional[dict] = None, locals: typing.Optional[dict] = None) -> tuple[dict, dict]:

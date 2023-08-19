@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2023 Hao Zhang<zh970205@mail.ustc.edu.cn>
+# Copyright (C) 2023 Hao Zhang<hzhangxyz@outlook.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from __future__ import annotations
-
 import ast
 import inspect
 from easy_ast import Statements, Expression, Exec, Eval, Macro
