@@ -29,7 +29,7 @@ class PlusMultExchange(AstDecorator):
         return self.generic_visit(result)
 
 
-@PlusMultExchange
+@PlusMultExchange()
 def add(a, b):
     return a + b
 

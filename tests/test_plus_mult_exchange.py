@@ -32,7 +32,7 @@ class PlusMultExchange(AstDecorator):
         return self.generic_visit(result)
 
 
-@PlusMultExchange
+@PlusMultExchange()
 def add(a, b):
     return a + b
 
@@ -41,7 +41,7 @@ def test_add():
     assert add(2, 3) == 6
 
 
-@PlusMultExchange
+@PlusMultExchange()
 def func(a, b, c, d):
     return (a + 2) * b - (c + d)
 
@@ -62,7 +62,7 @@ def logger(func):
 
 
 @logger
-@PlusMultExchange
+@PlusMultExchange()
 def log_before_dec_add(a, b):
     return a + b
 
@@ -74,7 +74,7 @@ def test_log_before_dec_add():
     assert count == 1
 
 
-@PlusMultExchange
+@PlusMultExchange()
 @logger
 def log_after_dec_add(a, b):
     return a + b
