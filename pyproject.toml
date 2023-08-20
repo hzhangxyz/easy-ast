@@ -1,6 +1,6 @@
 [project]
 name = "easy_ast"
-version = "0.0.3"
+version = "0.0.4"
 description = "This package `easy-ast` contains several utility about AST transformer."
 authors = [
     {name = "Hao Zhang", email="hzhanxyz@outlook.com"},
