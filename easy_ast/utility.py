@@ -22,8 +22,6 @@ import inspect
 import types
 import typing
 
-debug: bool = False
-
 
 def _get_default_context(globals: typing.Optional[dict] = None, locals: typing.Optional[dict] = None) -> tuple[dict, dict]:
     """
@@ -133,11 +131,6 @@ def Exec(module: ast.Module, globals: typing.Optional[dict] = None, locals: typi
     """
     globals, locals = _get_default_context(globals, locals)
     code: str = _ast_to_code(module)
-    global debug
-    if debug:
-        print("\nexec code begin")
-        print(code)
-        print("exec code end\n")
     exec(code, globals, locals)
 
 
@@ -147,10 +140,6 @@ def Eval(expression: ast.Expression, globals=None, locals=None) -> typing.Any:
     """
     globals, locals = _get_default_context(globals, locals)
     code: str = _ast_to_code(expression)
-    if debug:
-        print("\neval code begin")
-        print(code)
-        print("eval code end\n")
     return eval(code, globals, locals)
 
 
@@ -210,7 +199,7 @@ class Macro(ast.NodeTransformer):
         Extract the expression in the given function, process with the macro and eval in time.
         """
         globals, locals = _get_default_context(globals, locals)
-        module: ast.Module = Statements(func)
+        module: ast.Module = Expression(func)
         result: ast.Expression = typing.cast(ast.Expression, self(module))
         return Eval(result, globals, locals)
 
