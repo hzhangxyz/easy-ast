@@ -85,3 +85,16 @@ def test_einsum_5():
         assert np.all(x[0] == 5)
         y = a[i] * b[i]
         assert np.all(y == 5)
+
+
+def test_einsum_6():
+    import numpy as np
+    a = np.array([1, 2])
+    b = np.array([1, 2])
+
+    @TensorContract().exec
+    def _(i):
+        c[i] = a[i] * b[i]
+        assert np.all(c == [1, 4])
+        d = a[i]
+        assert d == 3

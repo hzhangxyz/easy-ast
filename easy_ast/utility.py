@@ -199,7 +199,7 @@ class Macro(ast.NodeTransformer):
         Extract the expression in the given function, process with the macro and eval in time.
         """
         globals, locals = _get_default_context(globals, locals)
-        module: ast.Module = Expression(func)
+        module: ast.Expression = Expression(func)
         result: ast.Expression = typing.cast(ast.Expression, self(module))
         return Eval(result, globals, locals)
 

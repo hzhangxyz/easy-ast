@@ -16,7 +16,10 @@ jobs:
         with:
           python-version: "3.10"
       - name: install pytest
-        run: pip install pytest pytest-cov numpy
+        run: pip install pytest pytest-cov numpy mypy
+      - name: type check
+        working-directory: ${{github.workspace}}
+        run: python -m mypy easy_ast
       - name: run test
         working-directory: ${{github.workspace}}
         run: python -m pytest --cov=easy_ast --cov-fail-under=90

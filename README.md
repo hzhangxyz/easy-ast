@@ -176,3 +176,21 @@ def _(i, j, k, l, m):
     r[j, m, 1] = a[i, 0, j, k] * b[i, l] * c[k, l, m] - d[m, j]
     assert np.sum(np.abs(r)) < 1e-6
 ```
+
+It also supports non-standard Einstein notation.
+
+```python
+import numpy as np
+from easy_ast.tensor_contract import TensorContract
+
+a = np.array([1, 2])
+b = np.array([1, 2])
+
+
+@TensorContract().exec
+def _(i):
+    c[i] = a[i] * b[i]
+    assert np.all(c == [1, 4])
+    d = a[i]
+    assert d == 3
+```

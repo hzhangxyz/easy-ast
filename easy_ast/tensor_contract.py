@@ -189,19 +189,56 @@ class TensorContract(Macro):
             free_index=free_index,
         )
 
-    def parse_expr(self: typing.Self, node: ast.AST) -> ast.AST:
+    def _record_dummy(self: typing.Self, node: ast.AST) -> set[str]:
+        """
+        Record dummy index for node and all its child node.
+        """
+        result = set()
+        if isinstance(node, ast.Name):
+            if node.id in self.dummy_index:
+                result.add(node.id)
+        for field, value in ast.iter_fields(node):
+            if isinstance(value, list):
+                for item in value:
+                    if isinstance(item, ast.AST):
+                        result |= self._record_dummy(item)
+            elif isinstance(value, ast.AST):
+                result |= self._record_dummy(value)
+        setattr(node, "inside_index", result)
+        return result
+
+    def parse_expr(self: typing.Self, node: ast.AST, outside_index: set[str]) -> ast.AST:
         result: ast.AST
         match node:
             case ast.BinOp(op=op, left=left, right=right):
-                parsed_left: ast.AST = self.parse_expr(left)
-                parsed_right: ast.AST = self.parse_expr(right)
+                # Consider this graph
+                #    |     |      |
+                #    a /---b---\  c
+                #    |/         \ |
+                #  LEFT ---d--- RIGHT
+                #    | e          | f
+                #
+                # outside_index: a | b | c
+                # left_inside_index: a | b | d | e
+                # right_inside_index: b | c | d | f
+                left_inside_index: set[str] = getattr(left, "inside_index")
+                right_inside_index: set[str] = getattr(right, "inside_index")
+                # The outside_index for left should be: a | b | d
+                # The outside_index for right should be: b | c | d
+                parsed_left: ast.AST = self.parse_expr(left, left_inside_index ^ (right_inside_index | outside_index))
+                parsed_right: ast.AST = self.parse_expr(right, right_inside_index ^ (left_inside_index | outside_index))
                 result = ast.BinOp(op=op, left=parsed_left, right=parsed_right)
                 if hasattr(parsed_left, "free_index"):
                     if hasattr(parsed_right, "free_index"):
                         match op:
+                        # left_free_index: a | b | d
+                        # right_free_index: b | c | d
                             case ast.Mult():
-                                result_free_index = ([i for i in parsed_left.free_index if i not in parsed_right.free_index] +  #
-                                                     [i for i in parsed_right.free_index if i not in parsed_left.free_index])
+                                # should be: a c b
+                                result_free_index = ([i for i in parsed_left.free_index if i not in parsed_right.free_index] +  # a
+                                                     [i for i in parsed_right.free_index if i not in parsed_left.free_index] +  # c
+                                                     [i for i in parsed_right.free_index if i in parsed_left.free_index and i in outside_index]  # b
+                                                    )
                                 result = self.contract(parsed_left, parsed_right, result_free_index)
                                 setattr(result, "free_index", result_free_index)
                                 return result
@@ -226,14 +263,14 @@ class TensorContract(Macro):
                     else:
                         return result
             case ast.UnaryOp(op=op, operand=operand):
-                parsed_operand = self.parse_expr(operand)
+                parsed_operand = self.parse_expr(operand, outside_index)
                 tensor_operand = hasattr(operand, "free_index")
                 result = ast.UnaryOp(op=op, operand=parsed_operand)
                 if hasattr(parsed_operand, "free_index"):
                     setattr(result, "free_index", getattr(parsed_operand, "free_index"))
                     return result
             case ast.Subscript() as subscript:
-                if self._contain_dummy_index(subscript):
+                if len(getattr(subscript, "inside_index")) != 0:
                     return self.parse_tensor(subscript)
             case _:
                 pass
@@ -242,31 +279,34 @@ class TensorContract(Macro):
     def visit_Assign(self, node: ast.Assign) -> ast.AST:
         # Macro process only if it is a assignment containing dummy index.
         if self._contain_dummy_index(node):
+            self._record_dummy(node)
             assert len(node.targets) == 1, "The target of tensor contract assignment does not support unpacking"
             target: ast.AST = node.targets[0]
             parsed_target: ast.AST
             parsed_expr: ast.AST
+            target_free_index: list[str]
             match target:
                 case ast.Subscript() as target:
-                    if self._contain_dummy_index(target):
+                    if len(getattr(target, "inside_index")) != 0:
                         # Target is a einsum tensor
                         parsed_target = self.parse_tensor(target)
                         assert isinstance(parsed_target, ast.Subscript)
                         assert isinstance(parsed_target.slice, ast.Tuple)
+                        target_free_index = getattr(parsed_target, "free_index")
                         # The target could be a part of existent tensor or a new tensor
                         # if two length equal -> new tensor, else -> part of eixstent tensor
-                        if len(parsed_target.slice.elts) == len(getattr(parsed_target, "free_index")):
-                            setattr(parsed_target.value, "free_index", getattr(parsed_target, "free_index"))
+                        if len(parsed_target.slice.elts) == len(target_free_index):
                             parsed_target = parsed_target.value
                     else:
                         # Target is scalar
                         parsed_target = target
-                        setattr(parsed_target, "free_index", [])
+                        target_free_index = []
                 case _:
                     # Target is scalar
                     parsed_target = target
-                    setattr(parsed_target, "free_index", [])
-            parsed_expr = self.parse_expr(node.value)
+                    target_free_index = []
+            setattr(parsed_target, "free_index", target_free_index)
+            parsed_expr = self.parse_expr(node.value, set(target_free_index))
             return ast.Assign(
                 targets=[parsed_target],
                 value=self.transpose(parsed_expr, getattr(parsed_target, "free_index")),
