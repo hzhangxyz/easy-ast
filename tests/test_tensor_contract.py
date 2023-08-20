@@ -25,7 +25,7 @@ def test_einsum():
     expect = -np.array([[1, 2], [2, 4]])
 
     @TensorContract().exec
-    def x(i, j):
+    def _(i, j):
         d = 1
         assert d == 1
         a[i, j] = -(b[i] * c[j])
