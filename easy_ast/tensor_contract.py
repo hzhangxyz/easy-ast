@@ -25,7 +25,7 @@ from .utility import *
 
 class TensorContract(Macro):
 
-    def visit_Root(self: typing.Self, node: ast.Module | ast.Expression) -> ast.Module | ast.Expression:
+    def visit_Root(self, node: ast.Module | ast.Expression) -> ast.Module | ast.Expression:
         """
         Get the dummy_index set from the attribute recorded in root node.
         """
@@ -33,7 +33,7 @@ class TensorContract(Macro):
         self.dummy_index |= set(attribute.get("_args", []))
         return typing.cast(ast.Module | ast.Expression, self.generic_visit(node))
 
-    def _is_dummy_index(self: typing.Self, node: ast.AST) -> bool:
+    def _is_dummy_index(self, node: ast.AST) -> bool:
         """
         Check whether a node is dummy index node
         """
@@ -43,7 +43,7 @@ class TensorContract(Macro):
             case _:
                 return False
 
-    def _contain_dummy_index(self: typing.Self, node: ast.AST) -> bool:
+    def _contain_dummy_index(self, node: ast.AST) -> bool:
         """
         Check whether a node contains dummy index node
         """
@@ -113,7 +113,7 @@ class TensorContract(Macro):
         )
 
     def __init__(
-        self: typing.Self,
+        self,
         dummy_index: typing.Optional[set[str]] = None,
         contract: typing.Optional[typing.Callable[[ast.AST, ast.AST, list[str]], ast.AST]] = None,
         transpose: typing.Optional[typing.Callable[[ast.AST, list[str]], ast.AST]] = None,
@@ -189,7 +189,7 @@ class TensorContract(Macro):
             free_index=free_index,
         )
 
-    def _record_dummy(self: typing.Self, node: ast.AST) -> set[str]:
+    def _record_dummy(self, node: ast.AST) -> set[str]:
         """
         Record dummy index for node and all its child node.
         """
@@ -207,7 +207,7 @@ class TensorContract(Macro):
         setattr(node, "inside_index", result)
         return result
 
-    def parse_expr(self: typing.Self, node: ast.AST, outside_index: set[str]) -> ast.AST:
+    def parse_expr(self, node: ast.AST, outside_index: set[str]) -> ast.AST:
         result: ast.AST
         match node:
             case ast.BinOp(op=op, left=left, right=right):

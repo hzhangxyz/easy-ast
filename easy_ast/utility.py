@@ -179,13 +179,13 @@ class Macro(ast.NodeTransformer):
         ...
     """
 
-    def __call__(self: typing.Self, tree: ast.AST) -> ast.AST:
+    def __call__(self, tree: ast.AST) -> ast.AST:
         """
         Run the AST transformer over an AST tree
         """
         return self.visit(tree)
 
-    def exec(self: typing.Self, func: types.FunctionType, globals: typing.Optional[dict] = None, locals: typing.Optional[dict] = None) -> None:
+    def exec(self, func: types.FunctionType, globals: typing.Optional[dict] = None, locals: typing.Optional[dict] = None) -> None:
         """
         Extract the statements in the given function, process with the macro and exec in time.
         """
@@ -194,7 +194,7 @@ class Macro(ast.NodeTransformer):
         result: ast.Module = typing.cast(ast.Module, self(module))
         Exec(result, globals, locals)
 
-    def eval(self: typing.Self, func: types.FunctionType, globals: typing.Optional[dict] = None, locals: typing.Optional[dict] = None) -> typing.Any:
+    def eval(self, func: types.FunctionType, globals: typing.Optional[dict] = None, locals: typing.Optional[dict] = None) -> typing.Any:
         """
         Extract the expression in the given function, process with the macro and eval in time.
         """
@@ -203,13 +203,13 @@ class Macro(ast.NodeTransformer):
         result: ast.Expression = typing.cast(ast.Expression, self(module))
         return Eval(result, globals, locals)
 
-    def visit_Module(self: typing.Self, node: ast.Module) -> ast.Module:
+    def visit_Module(self, node: ast.Module) -> ast.Module:
         return typing.cast(ast.Module, self.visit_Root(node))
 
-    def visit_Expression(self: typing.Self, node: ast.Expression) -> ast.Expression:
+    def visit_Expression(self, node: ast.Expression) -> ast.Expression:
         return typing.cast(ast.Expression, self.visit_Root(node))
 
-    def visit_Root(self: typing.Self, node: ast.Module | ast.Expression) -> ast.Module | ast.Expression:
+    def visit_Root(self, node: ast.Module | ast.Expression) -> ast.Module | ast.Expression:
         """
         The default visitor for module and expression. User could override this function once to override visitor for both module and expression.
 
@@ -247,7 +247,7 @@ class AstDecorator(ast.NodeTransformer):
     function = yyy(function)
     """
 
-    def __call__(self: typing.Self, func: types.FunctionType) -> types.FunctionType:
+    def __call__(self, func: types.FunctionType) -> types.FunctionType:
         """
         Transform AST tree of the given function and return.
         """
@@ -262,11 +262,11 @@ class AstDecorator(ast.NodeTransformer):
         exec(new_source, globals, locals)
         return locals[func.__name__]
 
-    def __init__(self: typing.Self) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.globals, self.locals = _get_default_context()
 
-    def _remove_decorator_above(self: typing.Self, node: ast.FunctionDef) -> ast.FunctionDef:
+    def _remove_decorator_above(self, node: ast.FunctionDef) -> ast.FunctionDef:
         """
         Remove the decorator above the current decorator.
 
