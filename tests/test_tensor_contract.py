@@ -18,7 +18,7 @@
 from easy_ast.tensor_contract import TensorContract
 
 
-def test_einsum():
+def test_einsum_1():
     import numpy as np
     b = np.array([1, 2])
     c = np.array([1, 2])
@@ -26,13 +26,25 @@ def test_einsum():
 
     @TensorContract().exec
     def _(i, j):
-        d = 1
-        assert d == 1
-        a[i, j] = -(b[i] * c[j])
+        a[i, j] = -b[i] * c[j]
         assert np.all(a == expect)
 
 
 def test_einsum_2():
+    import numpy as np
+    b = np.array([1, 2])
+    c = np.array([1, 2])
+    expect = -np.array([[1, 2], [2, 4]])
+
+    @TensorContract(dummy_index={"i", "j"}).exec
+    def _():
+        d = 1
+        assert d == 1
+        a[i, j] = -b[i] * c[j]
+        assert np.all(a == expect)
+
+
+def test_einsum_3():
     import numpy as np
     b = np.random.randn(3, 2, 6, 5)
     c = np.random.randn(3, 4)
@@ -43,6 +55,33 @@ def test_einsum_2():
 
     @TensorContract().exec
     def _(i, j, k, l, m):
+        x = 1
         # i3, j6, k5, l4, m2
-        a[j, m, 1] = b[i, 0, j, k] * c[i, l] * d[k, l, m] - e[m, j]
+        a[j, m, x] = b[i, 0, j, k] * c[i, l] * d[k, l, m] - e[m, j]
         assert np.sum(np.abs(a)) < 1e-6
+
+
+def test_einsum_4():
+    import numpy as np
+    b = np.array([1, 2])
+    c = np.array([1, 2])
+    d = np.array([[1, 2], [2, 4]]) / 2.
+
+    @TensorContract().exec
+    def _(i, j):
+        a[i, j] = -b[i] * c[j] + 1 * d[i, j] * (1 + 1)
+        assert np.all(a == 0)
+
+
+def test_einsum_5():
+    import numpy as np
+    a = np.array([1, 2])
+    b = np.array([1, 2])
+    x = [0]
+
+    @TensorContract().exec
+    def _(i):
+        x[0] = a[i] * b[i]
+        assert np.all(x[0] == 5)
+        y = a[i] * b[i]
+        assert np.all(y == 5)

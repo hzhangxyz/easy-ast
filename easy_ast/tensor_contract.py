@@ -167,29 +167,27 @@ class TensorContract(Macro):
         |- Target
         All of these three could be contain free_index as empty list
         """
-        match node:
-            case ast.Subscript(value=value, slice=slices):
-                match slices:
-                    case ast.Tuple(elts=elts):
-                        indices = elts
-                    case _ as elt:
-                        indices = [elt]
-                free_index: list[str] = []
-                result_index: list[ast.AST] = []
-                for index in indices:
-                    if self._is_dummy_index(index):
-                        free_index.append(typing.cast(ast.Name, index).id)
-                        result_index.append(ast.Slice())
-                    else:
-                        result_index.append(index)
-                return ast.Subscript(
-                    value=value,
-                    slice=ast.Tuple(elts=result_index),
-                    ctx=node.ctx,
-                    free_index=free_index,
-                )
-            case _:
-                raise RuntimeError("Logical Critical Error")
+        value = node.value
+        slices = node.slice
+        match slices:
+            case ast.Tuple(elts=elts):
+                indices = elts
+            case _ as elt:
+                indices = [elt]
+        free_index: list[str] = []
+        result_index: list[ast.AST] = []
+        for index in indices:
+            if self._is_dummy_index(index):
+                free_index.append(typing.cast(ast.Name, index).id)
+                result_index.append(ast.Slice())
+            else:
+                result_index.append(index)
+        return ast.Subscript(
+            value=value,
+            slice=ast.Tuple(elts=result_index),
+            ctx=node.ctx,
+            free_index=free_index,
+        )
 
     def parse_expr(self: typing.Self, node: ast.AST) -> ast.AST:
         result: ast.AST
